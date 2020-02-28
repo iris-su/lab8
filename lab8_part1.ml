@@ -113,25 +113,13 @@ module MakeInterval (Endpoint : ORDERED_TYPE) =
     (* intersect intvl1 intvl2 -- Returns the intersection of `intvl1`
        and `intvl2` *)
     let intersect (intvl1 : interval) (intvl2 : interval) : interval =
+      let ordered x y = if Endpoint.compare x y <= 0 then x, y else y, x in
       match intvl1, intvl2 with
       | Empty, _ | _, Empty -> Empty
       | Interval (low1, high1), Interval (low2, high2) ->
-        if Endpoint.compare high2 low2 < 0 || Endpoint.compare high1 low1 < 0
-        then Empty
-        else if
-          Endpoint.compare high1 low2 > 0 || Endpoint.compare high2 low1 > 0
-        then
-          let low =
-             if Endpoint.compare low1 low2 < 0
-             then low2
-             else low1 in
-          let high =
-            if Endpoint.compare high1 high2 < 0
-            then high1
-            else high2 in
-          Interval (low, high)
-        else Empty
-    end ;;
+        let (_, low), (high, _)  = ordered low1 low2, ordered high1 high2 in
+        create low high
+end ;;
 
 (*......................................................................
 Exercise 1B: Using the completed functor above, instantiate an integer
